@@ -13,9 +13,12 @@ const tabs = document.querySelectorAll('.operations__tab');
 const tabsContainer = document.querySelector('.operations__tab-container');
 const tabsContent = document.querySelectorAll('.operations__content');
 const nav = document.querySelector('.nav');
-const  header = document.querySelector('.header');
+const header = document.querySelector('.header');
 const allSections = document.querySelectorAll('.section');
+const imgTargets = document.querySelectorAll('img[data-src]');
 
+
+// Modal window
 
 const openModal = function () {
 	modal.classList.remove('hidden');
@@ -38,6 +41,9 @@ document.addEventListener('keydown', function (e) {
 });
 
 
+///////////////////////////////////////
+// Button scrolling
+
 btnScrollTo.addEventListener('click', function (e) {
 	// const s1coords = section1.getBoundingClientRect();
 	// console.log(s1coords);
@@ -59,8 +65,11 @@ btnScrollTo.addEventListener('click', function (e) {
 	section1.scrollIntoView({behavior: 'smooth'})
 });
 
+// Page navigation
+
 document.querySelector('.nav__links').addEventListener('click', function (e) {
 	e.preventDefault();
+	// Matching strategy
 	if (e.target.classList.contains('nav__link')) {
 		const id = e.target.getAttribute('href');
 		console.log(id);
@@ -70,10 +79,13 @@ document.querySelector('.nav__links').addEventListener('click', function (e) {
 
 });
 
+///////////////////////////////////////
+// Tabbed component
 
 tabsContainer.addEventListener('click', function (e) {
 	const clicked = e.target.closest('.operations__tab');
 	// console.log(clicked);
+	// Guard clause
 	if (!clicked) return;
 
 	tabs.forEach(t => t.classList.remove);
@@ -84,6 +96,9 @@ tabsContainer.addEventListener('click', function (e) {
 
 });
 
+
+///////////////////////////////////////
+// Menu fade animation
 
 const handleHover = function (e) {
 	if (e.target.classList.contains('nav__link')) {
@@ -103,7 +118,8 @@ const handleHover = function (e) {
 nav.addEventListener('mouseover', handleHover.bind(0.5));
 nav.addEventListener('mouseout', handleHover.bind(1));
 
-
+///////////////////////////////////////
+// Sticky navigation: Intersection Observer API
 const intialCoords = section1.getBoundingClientRect();
 // console.log(intialCoords)
 window.addEventListener('scroll', function (e) {
@@ -111,42 +127,68 @@ window.addEventListener('scroll', function (e) {
 	else nav.classList.remove('sticky');
 });
 
+///////////////////////////////////////
+// Sticky navigation: Intersection Observer API
+
 const navHeight = nav.getBoundingClientRect().height;
 // console.log(navHeight)
 
-const stickyNav = function (entries){
+const stickyNav = function (entries) {
 	const [entry] = entries;
 	// console.log(entry);
 
-	if(!entry.isIntersecting) nav.classList.add('sticky');
+	if (!entry.isIntersecting) nav.classList.add('sticky');
 	else nav.classList.remove('sticky')
 
 	nav.classList.add('sticky');
 }
-const headerObsrver = new IntersectionObserver(stickyNav,{
+const headerObsrver = new IntersectionObserver(stickyNav, {
 	root: null,
 	threshold: 0,
 	rootMargin: `-${navHeight}px`,
 });
 headerObsrver.observe(header)
 
-const revealSection = function(entries, observer){
+const revealSection = function (entries, observer) {
 	const [entry] = entries;
 	console.log(entry);
-	if(!entry.isIntersecting) return;
+	if (!entry.isIntersecting) return;
 	entry.target.classList.remove('section--hidden');
 	observer.unobserve(entry.target);
 };
 
-const sectionObserver = new IntersectionObserver(revealSection,{
+const sectionObserver = new IntersectionObserver(revealSection, {
 	root: null,
 	threshold: 0.15,
 });
 
-allSections.forEach(function(section){
+allSections.forEach(function (section) {
 	sectionObserver.observe(section);
 	section.classList.add('section--hidden')
 })
+
+
+//Lazy Loading images
+
+const loadImg = function (entries, observer) {
+	const [entry] = entries;
+	if (!entry.isIntersecting) return;
+	entry.target.src = entry.target.dataset.src;
+	entry.target.addEventListener('load', function () {
+		entry.target.classList.remove('lazy-img')
+
+	});
+	observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loadImg, {
+	root: null,
+	threshold: 0,
+	rootMargin:'-250px',
+});
+
+imgTargets.forEach(img => imgObserver.observe(img));
+
 
 //// document.querySelectorAll('.nav__link').forEach(function (el){
 // 	el.addEventListener('click', function (e){
